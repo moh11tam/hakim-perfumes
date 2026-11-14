@@ -57,6 +57,7 @@ body {
 .animate-fadeIn {
   animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
 /* إخفاء شريط التمرير مع الحفاظ على إمكانية السحب */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -65,6 +66,25 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* حركة الشريط الإعلاني المتحرك (Marquee) */
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* حركة انزلاق النص من الأسفل للأعلى (Fade & Slide) */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(35px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* حركة ظهور سينمائية بطيئة وناعمة */
 @keyframes slowReveal {
   0% {

@@ -12,10 +12,8 @@ import { Sparkles, ShieldCheck, Truck, Award } from 'lucide-react';
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const currency = 'DZD'; // الدينار الجزائري
+  const currency = 'DZD';
   const [quickViewProduct, setQuickViewProduct] = useState(null);
-  
-  // حالة تخزين المنتج المختار لفتح نافذة إدخال المعلومات
   const [checkoutProduct, setCheckoutProduct] = useState(null);
 
   const filteredProducts = PRODUCTS.filter(p => {
@@ -24,7 +22,6 @@ export default function App() {
     return matchCat && matchSearch;
   });
 
-  // دالة استقبال المنتج المختار وفتح نافذة إتمام الطلب مباشرة
   const handleDirectCheckout = (product, size, price) => {
     setCheckoutProduct({
       ...product,
@@ -34,7 +31,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121214] text-[#F9F8F6] flex flex-col font-['Cairo']">
+    <div className="min-h-screen bg-[#121214] text-[#F9F8F6] flex flex-col font-['Cairo'] relative overflow-hidden">
       
       {/* شريط التنقل العلوي */}
       <Navbar
@@ -50,7 +47,7 @@ export default function App() {
       {/* قسم قصة الدار والترحيب */}
       <StorySection />
 
-      {/* قسم مميزات الدار (لماذا نحن؟) */}
+      {/* قسم مميزات الدار */}
       <section className="py-16 border-b luxury-border bg-[#1A1A1E]/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-[#1A1A1E] border luxury-border p-6 rounded-3xl text-center space-y-3">
@@ -87,31 +84,39 @@ export default function App() {
         </div>
       </section>
 
-      {/* قسم المنتجات والعطور الرئيسية */}
+      {/* قسم المنتجات الرئيسي */}
       <main id="collection" className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 w-full">
         
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-16 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
           <div>
             <span className="text-[#D4AF37] text-xs font-semibold uppercase tracking-[0.2em] block mb-2">تسوق حسب التصنيف</span>
             <h3 className="font-amiri text-2xl sm:text-4xl font-bold text-[#F9F8F6]">اختر عطرك ومستحضراتك المفضلة</h3>
           </div>
+        </div>
 
-          {/* فلاتر التصنيفات */}
-          <div className="flex items-center gap-2.5 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`shrink-0 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs font-bold transition cursor-pointer tracking-wider ${
-                  selectedCategory === cat.id 
-                    ? 'gold-btn shadow-lg' 
-                    : 'bg-[#1A1A1E] border luxury-border text-[#C5C5C0] hover:text-[#F9F8F6]'
-                }`}
-              >
-                {cat.name}
-              </button>
-            ))}
+        {/* الشريط الإعلاني المتحرك (موضوع تحديداً تحت عنوان تصفح المنتجات وفوق الفلاتر) */}
+        <div className="bg-gradient-to-r from-[#8A6208] via-[#D4AF37] to-[#8A6208] text-[#121214] py-2.5 rounded-2xl overflow-hidden whitespace-nowrap mb-10 shadow-lg">
+          <div className="inline-block animate-[marquee_22s_linear_infinite] text-xs sm:text-sm font-bold tracking-wider">
+            ✨ توصيل سريع وحصري داخل كافة أحياء ولاية تمنراست • الدفع عند الاستلام • جودة أصلية ومضمونة 100% في عطور حكيم ✨&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            ✨ توصيل سريع وحصري داخل كافة أحياء ولاية تمنراست • الدفع عند الاستلام • جودة أصلية ومضمونة 100% في عطور حكيم ✨
           </div>
+        </div>
+
+        {/* فلاتر التصنيفات */}
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-4 mb-10 no-scrollbar">
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`shrink-0 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs font-bold transition cursor-pointer tracking-wider ${
+                selectedCategory === cat.id 
+                  ? 'gold-btn shadow-lg' 
+                  : 'bg-[#1A1A1E] border luxury-border text-[#C5C5C0] hover:text-[#F9F8F6]'
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
         </div>
 
         {/* شبكة عرض المنتجات */}
@@ -135,7 +140,7 @@ export default function App() {
 
       </main>
 
-      {/* نافذة تفاصيل العطر (العين) */}
+      {/* نافذة تفاصيل العطر */}
       <QuickViewModal
         product={quickViewProduct}
         currency={currency}
@@ -143,7 +148,7 @@ export default function App() {
         onAddToCart={handleDirectCheckout}
       />
 
-      {/* نافذة ملء المعلومات المنبثقة لتأكيد الشراء (تظهر فور اختيار المنتج) */}
+      {/* نافذة ملء المعلومات المنبثقة لتأكيد الشراء */}
       <CheckoutModal
         isOpen={Boolean(checkoutProduct)}
         onClose={() => setCheckoutProduct(null)}
