@@ -5,17 +5,18 @@ import Hero from './components/Hero';
 import StorySection from './components/StorySection';
 import ProductCard from './components/ProductCard';
 import QuickViewModal from './components/QuickViewModal';
-import CartDrawer from './components/CartDrawer';
+import CheckoutModal from './components/CheckoutModal';
 import Footer from './components/Footer';
 import { Sparkles, ShieldCheck, Truck, Award } from 'lucide-react';
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const currency = 'DZD'; // مثبت على الدينار الجزائري
-  const [cart, setCart] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const currency = 'DZD'; // الدينار الجزائري
   const [quickViewProduct, setQuickViewProduct] = useState(null);
+  
+  // حالة تخزين المنتج المختار لفتح نافذة إدخال المعلومات
+  const [checkoutProduct, setCheckoutProduct] = useState(null);
 
   const filteredProducts = PRODUCTS.filter(p => {
     const matchCat = selectedCategory === 'all' || p.category === selectedCategory;
@@ -23,32 +24,27 @@ export default function App() {
     return matchCat && matchSearch;
   });
 
-  const handleAddToCart = (product, size, price) => {
-    const cartId = `${product.id}-${size}`;
-    setCart(prev => {
-      const idx = prev.findIndex(item => item.cartId === cartId);
-      if (idx > -1) {
-        const updated = [...prev];
-        updated[idx].quantity += 1;
-        return updated;
-      }
-      return [...prev, { ...product, cartId, size, price, quantity: 1 }];
+  // دالة استقبال المنتج المختار وفتح نافذة إتمام الطلب مباشرة
+  const handleDirectCheckout = (product, size, price) => {
+    setCheckoutProduct({
+      ...product,
+      selectedSize: size,
+      selectedPrice: price
     });
-    setIsCartOpen(true);
   };
 
   return (
     <div className="min-h-screen bg-[#121214] text-[#F9F8F6] flex flex-col font-['Cairo']">
       
-      {/* شريط التنقل العلوي والهمبرغر (بدون زر العملات) */}
+      {/* شريط التنقل العلوي */}
       <Navbar
-        cartCount={cart.reduce((acc, item) => acc + item.quantity, 0)}
-        onOpenCart={() => setIsCartOpen(true)}
+        cartCount={0}
+        onOpenCart={() => {}}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
       />
 
-      {/* الواجهة السينمائية الرئيسية مع العنوان والصورة الترحيبية تحتها */}
+      {/* الواجهة السينمائية الرئيسية */}
       <Hero />
 
       {/* قسم قصة الدار والترحيب */}
@@ -78,7 +74,7 @@ export default function App() {
               <Truck className="w-6 h-6" />
             </div>
             <h4 className="font-amiri text-lg font-bold text-[#F9F8F6]">توصيل سريع وآمن</h4>
-            <p className="text-xs text-[#C5C5C0] font-light leading-relaxed">خدمة توصيل تغطي كافة الولايات بعناية فائقة.</p>
+            <p className="text-xs text-[#C5C5C0] font-light leading-relaxed">خدمة توصيل تغطي كافة ولاية تمنراست وأحياؤها.</p>
           </div>
 
           <div className="bg-[#1A1A1E] border luxury-border p-6 rounded-3xl text-center space-y-3">
@@ -100,7 +96,7 @@ export default function App() {
             <h3 className="font-amiri text-2xl sm:text-4xl font-bold text-[#F9F8F6]">اختر عطرك ومستحضراتك المفضلة</h3>
           </div>
 
-          {/* فلاتر التصنيفات بالتمرير الأفقي السلس */}
+          {/* فلاتر التصنيفات */}
           <div className="flex items-center gap-2.5 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
             {CATEGORIES.map(cat => (
               <button
@@ -118,7 +114,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* شبكة عرض المنتجات الفاخرة */}
+        {/* شبكة عرض المنتجات */}
         {filteredProducts.length === 0 ? (
           <div className="text-center py-20 text-[#C5C5C0] text-sm">
             عذراً، لم نتمكن من العثور على منتجات تطابق بحثك.
@@ -131,7 +127,7 @@ export default function App() {
                 product={product}
                 currency={currency}
                 onQuickView={setQuickViewProduct}
-                onAddToCart={handleAddToCart}
+                onAddToCart={handleDirectCheckout}
               />
             ))}
           </div>
@@ -139,23 +135,20 @@ export default function App() {
 
       </main>
 
-      {/* نافذة تفاصيل العطر والهرم العطري */}
+      {/* نافذة تفاصيل العطر (العين) */}
       <QuickViewModal
         product={quickViewProduct}
         currency={currency}
         onClose={() => setQuickViewProduct(null)}
-        onAddToCart={handleAddToCart}
+        onAddToCart={handleDirectCheckout}
       />
 
-      {/* سلة التسوق الملكية */}
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cart={cart}
-        onUpdateQuantity={(id, qty) => setCart(cart.map(c => c.cartId === id ? {...c, quantity: qty} : c))}
-        onRemoveItem={(id) => setCart(cart.filter(c => c.cartId !== id))}
+      {/* نافذة ملء المعلومات المنبثقة لتأكيد الشراء (تظهر فور اختيار المنتج) */}
+      <CheckoutModal
+        isOpen={Boolean(checkoutProduct)}
+        onClose={() => setCheckoutProduct(null)}
+        selectedProduct={checkoutProduct}
         currency={currency}
-        onClearCart={() => setCart([])}
       />
 
       {/* تذييل الصفحة */}

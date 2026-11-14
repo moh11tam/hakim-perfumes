@@ -1,63 +1,63 @@
 import React from 'react';
-import { Eye, Plus } from 'lucide-react';
-import { CURRENCIES } from '../data/products';
+import { Eye, ShoppingBag } from 'lucide-react';
 
 export default function ProductCard({ product, currency, onQuickView, onAddToCart }) {
-  const { symbol, rate } = CURRENCIES[currency];
-  const priceFormatted = Math.round(product.price50 * rate);
+  // اختيار السعر الافتراضي (الحجم 50 مل أو أول سعر متاح)
+  const defaultSize = product.price50 ? '50 مل' : 'حجم قياسي';
+  const defaultPrice = product.price50 || product.price120 || 3500;
 
   return (
-    <div className="group bg-[#1A1A1E] border luxury-border rounded-3xl overflow-hidden hover:border-[#D4AF37] transition duration-500 flex flex-col shadow-xl">
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#121214]">
+    <div className="group bg-[#1A1A1E] border luxury-border rounded-3xl overflow-hidden flex flex-col justify-between transition duration-500 hover:border-[#D4AF37]/50 hover:shadow-2xl hover:shadow-[#D4AF37]/10">
+      
+      {/* صورة المنتج مع الشارة */}
+      <div className="relative aspect-[4/4] overflow-hidden bg-[#121214]">
         <img 
           src={product.image} 
           alt={product.name} 
-          className="w-full h-full object-cover group-hover:scale-105 transition duration-700" 
+          className="w-full h-full object-cover transition duration-700 group-hover:scale-110" 
         />
+        
         {product.badge && (
-          <span className="absolute top-4 right-4 bg-[#121214]/90 text-[#D4AF37] border luxury-border text-[11px] px-3.5 py-1 rounded-full font-medium tracking-wider">
+          <span className="absolute top-3 right-3 bg-[#D4AF37] text-[#121214] text-[10px] font-bold px-3 py-1 rounded-full shadow-lg">
             {product.badge}
           </span>
         )}
-        <button 
-          onClick={() => onQuickView(product)} 
-          className="absolute bottom-4 left-4 p-3 rounded-full bg-[#121214]/90 text-[#F9F8F6] hover:text-[#D4AF37] border luxury-border opacity-0 group-hover:opacity-100 transition duration-300 cursor-pointer shadow-lg"
-          title="معاينة الهرم العطري"
+
+        {/* زر المعالجة السريعة للهرم العطري */}
+        <button
+          onClick={() => onQuickView(product)}
+          className="absolute bottom-3 left-3 bg-[#121214]/80 backdrop-blur-md border luxury-border text-[#F9F8F6] p-2.5 rounded-xl opacity-0 group-hover:opacity-100 transition duration-300 hover:text-[#D4AF37] cursor-pointer"
+          title="عرض التفاصيل والهرم العطري"
         >
           <Eye className="w-4 h-4" />
         </button>
       </div>
 
-      <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-        <div>
-          <span className="text-[11px] text-[#C5C5C0] tracking-widest uppercase block">{product.subtitle}</span>
-          <h3 
-            onClick={() => onQuickView(product)} 
-            className="font-amiri text-2xl font-bold text-[#F9F8F6] mt-1.5 cursor-pointer hover:text-[#D4AF37] transition"
-          >
-            {product.name}
-          </h3>
-          <p className="text-xs text-[#C5C5C0] mt-2.5 line-clamp-2 leading-relaxed font-light">
-            {product.story}
-          </p>
+      {/* تفاصيل المنتج */}
+      <div className="p-5 flex flex-col flex-1 justify-between space-y-4">
+        <div className="space-y-1.5">
+          <span className="text-[10px] text-[#D4AF37] font-semibold tracking-wider uppercase block">{product.subtitle}</span>
+          <h4 className="font-amiri text-lg font-bold text-[#F9F8F6] line-clamp-1">{product.name}</h4>
+          <p className="text-xs text-[#C5C5C0] line-clamp-2 font-light leading-relaxed">{product.description}</p>
         </div>
 
-        <div className="pt-4 border-t border-[#121214] flex items-center justify-between">
+        {/* السعر وزر الشراء المباشر */}
+        <div className="pt-3 border-t border-stone-800/80 flex items-center justify-between">
           <div>
-            <span className="text-[10px] text-[#C5C5C0] block uppercase tracking-wider">حجم 50 مل</span>
-            <span className="text-xl font-bold gold-gradient-text">
-              {priceFormatted} {symbol}
-            </span>
+            <span className="text-[10px] text-[#C5C5C0] block">يبدأ من</span>
+            <span className="font-amiri text-base font-bold text-[#D4AF37]">{defaultPrice} {currency}</span>
           </div>
-          <button 
-            onClick={() => onAddToCart(product, '50ml', product.price50)} 
-            className="gold-btn text-xs font-bold px-5 py-3 rounded-2xl transition cursor-pointer flex items-center gap-1.5 shadow-md"
+
+          <button
+            onClick={() => onAddToCart(product, defaultSize, defaultPrice)}
+            className="gold-btn font-bold px-4 py-2.5 rounded-xl text-xs tracking-wide shadow-md flex items-center gap-1.5 cursor-pointer"
           >
-            <Plus className="w-4 h-4" /> 
-            اقتناء
+            <ShoppingBag className="w-3.5 h-3.5" />
+            <span>اقتناء</span>
           </button>
         </div>
       </div>
+
     </div>
   );
 }

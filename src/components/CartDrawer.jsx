@@ -1,146 +1,108 @@
 import React, { useState } from 'react';
-import { X, Trash2, CheckCircle2, ArrowRight, ShoppingBag } from 'lucide-react';
-import { CURRENCIES } from '../data/products';
+import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
+import CheckoutModal from './CheckoutModal';
 
 export default function CartDrawer({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, currency, onClearCart }) {
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [orderPlaced, setOrderPlaced] = useState(false);
-  const [formData, setFormData] = useState({ name: '', phone: '', address: '' });
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   if (!isOpen) return null;
-  const { symbol, rate } = CURRENCIES[currency];
-  const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  const finalTotal = Math.round(subtotal * rate);
+
+  const totalAmount = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex justify-start animate-fadeIn">
-      <div className="w-full max-w-md bg-[#1A1A1E] border-r luxury-border flex flex-col h-full shadow-2xl">
-        
-        {/* رأس السلة */}
-        <div className="p-6 border-b luxury-border flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <ShoppingBag className="w-5 h-5 text-[#D4AF37]" />
-            <h2 className="font-amiri text-xl font-bold text-[#F9F8F6]">حقيبة التسوق الخاصة ({cart.length})</h2>
-          </div>
-          <button onClick={onClose} className="p-2 text-[#C5C5C0] hover:text-[#F9F8F6] cursor-pointer transition">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* محتوى السلة */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {orderPlaced ? (
-            <div className="text-center py-20 space-y-5">
-              <CheckCircle2 className="w-16 h-16 text-[#D4AF37] mx-auto animate-bounce" />
-              <h3 className="font-amiri text-2xl font-bold text-[#F9F8F6]">تم اعتماد طلبكم الملكي بنجاح!</h3>
-              <p className="text-[#C5C5C0] text-sm leading-relaxed max-w-xs mx-auto">
-                شكراً لاختياركم Hakim Perfumes. سيتواصل معكم فريق خدمة العملاء الخاصة لتأكيد موعد التوصيل الفاخر.
-              </p>
-              <button 
-                onClick={() => { setOrderPlaced(false); setIsCheckingOut(false); onClearCart(); onClose(); }} 
-                className="gold-btn font-bold px-8 py-3.5 rounded-2xl cursor-pointer text-sm"
-              >
-                العودة للدار
-              </button>
-            </div>
-          ) : cart.length === 0 ? (
-            <div className="text-center py-24 text-[#C5C5C0] text-sm font-light">
-              حقيبة التسوق الخاصة بك فارغة حالياً.
-            </div>
-          ) : isCheckingOut ? (
-            <form onSubmit={(e) => { e.preventDefault(); setOrderPlaced(true); }} className="space-y-4">
-              <button 
-                type="button" 
-                onClick={() => setIsCheckingOut(false)} 
-                className="text-xs text-[#D4AF37] flex items-center gap-1 mb-2 cursor-pointer hover:underline"
-              >
-                <ArrowRight className="w-3.5 h-3.5" /> العودة لمحتويات الحقيبة
-              </button>
-              <h3 className="font-amiri text-lg font-bold text-[#F9F8F6]">معلومات التوصيل الفاخر</h3>
-              
-              <div className="space-y-1">
-                <label className="text-xs text-[#C5C5C0]">الاسم الكريم</label>
-                <input 
-                  type="text" 
-                  required 
-                  placeholder="الاسم الثلاثي" 
-                  value={formData.name} 
-                  onChange={e => setFormData({...formData, name: e.target.value})} 
-                  className="w-full bg-[#121214] border luxury-border rounded-xl p-3 text-sm text-[#F9F8F6] focus:outline-none focus:border-[#D4AF37]" 
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs text-[#C5C5C0]">رقم الهاتف المحمول</label>
-                <input 
-                  type="tel" 
-                  required 
-                  placeholder="05xxxxxxxx" 
-                  value={formData.phone} 
-                  onChange={e => setFormData({...formData, phone: e.target.value})} 
-                  className="w-full bg-[#121214] border luxury-border rounded-xl p-3 text-sm text-[#F9F8F6] focus:outline-none focus:border-[#D4AF37]" 
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs text-[#C5C5C0]">عنوان الإقامة المفصل</label>
-                <textarea 
-                  required 
-                  rows="3" 
-                  placeholder="المدينة، الحي، الشارع، رقم القصر أو الفيلا..." 
-                  value={formData.address} 
-                  onChange={e => setFormData({...formData, address: e.target.value})} 
-                  className="w-full bg-[#121214] border luxury-border rounded-xl p-3 text-sm text-[#F9F8F6] focus:outline-none focus:border-[#D4AF37]"
-                ></textarea>
-              </div>
-
-              <button 
-                type="submit" 
-                className="w-full gold-btn font-bold py-4 rounded-2xl cursor-pointer text-sm shadow-xl mt-4"
-              >
-                تأكيد الطلب الحصري (الدفع عند الاستلام)
-              </button>
-            </form>
-          ) : (
-            <div className="space-y-3">
-              {cart.map(item => (
-                <div key={item.cartId} className="bg-[#121214] border luxury-border rounded-2xl p-4 flex items-center gap-4">
-                  <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-xl border luxury-border" />
-                  <div className="flex-1">
-                    <h4 className="font-amiri font-bold text-sm text-[#F9F8F6]">{item.name}</h4>
-                    <span className="text-xs gold-gradient-text font-bold mt-1 block">
-                      {Math.round(item.price * rate * item.quantity)} {symbol}
-                    </span>
-                  </div>
-                  <button 
-                    onClick={() => onRemoveItem(item.cartId)} 
-                    className="text-[#C5C5C0] hover:text-red-400 cursor-pointer p-2 transition"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* تذييل السلة والمجموع */}
-        {!orderPlaced && cart.length > 0 && !isCheckingOut && (
-          <div className="p-6 border-t luxury-border bg-[#121214] space-y-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-[#C5C5C0]">المجموع النهائي</span>
-              <span className="font-bold gold-gradient-text text-xl">{finalTotal} {symbol}</span>
+    <>
+      <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex justify-end animate-fadeIn">
+        <div className="w-full max-w-md bg-[#121214] border-l luxury-border flex flex-col h-full shadow-2xl p-6">
+          
+          {/* رأس السلة */}
+          <div className="flex items-center justify-between pb-4 border-b border-stone-800">
+            <div className="flex items-center gap-2.5">
+              <ShoppingBag className="w-5 h-5 text-[#D4AF37]" />
+              <h3 className="font-amiri text-lg font-bold text-[#F9F8F6]">حقيبة التسوق</h3>
             </div>
             <button 
-              onClick={() => setIsCheckingOut(true)} 
-              className="w-full gold-btn font-bold py-4 rounded-2xl cursor-pointer text-sm shadow-xl"
+              onClick={onClose}
+              className="p-2 rounded-xl bg-[#1A1A1E] border luxury-border text-[#C5C5C0] hover:text-[#F9F8F6] cursor-pointer"
             >
-              متابعة لإتمام الطلب الملكي
+              <X className="w-5 h-5" />
             </button>
           </div>
-        )}
 
+          {/* محتوى السلة */}
+          <div className="flex-1 overflow-y-auto py-4 space-y-4">
+            {cart.length === 0 ? (
+              <div className="text-center py-20 text-[#C5C5C0] text-sm space-y-3">
+                <ShoppingBag className="w-12 h-12 mx-auto opacity-30 text-[#D4AF37]" />
+                <p>حقيبة التسوق الخاصة بك فارغة حالياً.</p>
+              </div>
+            ) : (
+              cart.map((item) => (
+                <div key={item.cartId} className="flex gap-4 items-center bg-[#1A1A1E] border luxury-border p-3.5 rounded-2xl">
+                  <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-xl border border-stone-800" />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-amiri font-bold text-sm text-[#F9F8F6] truncate">{item.name}</h4>
+                    <span className="text-[11px] text-[#C5C5C0] block mb-1">الحجم: {item.size}</span>
+                    <span className="text-xs font-bold text-[#D4AF37]">{item.price * item.quantity} {currency}</span>
+                  </div>
+
+                  {/* التحكم بالكمية */}
+                  <div className="flex flex-col items-end gap-2">
+                    <button 
+                      onClick={() => onRemoveItem(item.cartId)}
+                      className="text-stone-500 hover:text-red-400 transition cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <div className="flex items-center gap-2 bg-[#121214] border luxury-border rounded-lg px-2 py-1">
+                      <button 
+                        onClick={() => onUpdateQuantity(item.cartId, Math.max(1, item.quantity - 1))}
+                        className="text-[#C5C5C0] hover:text-[#F9F8F6] cursor-pointer"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <span className="text-xs font-bold text-[#F9F8F6]">{item.quantity}</span>
+                      <button 
+                        onClick={() => onUpdateQuantity(item.cartId, item.quantity + 1)}
+                        className="text-[#C5C5C0] hover:text-[#F9F8F6] cursor-pointer"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* تذييل السلة والمجموع */}
+          {cart.length > 0 && (
+            <div className="pt-4 border-t border-stone-800 space-y-4">
+              <div className="flex justify-between items-center text-sm font-bold">
+                <span className="text-[#C5C5C0]">المجموع الكلي:</span>
+                <span className="text-[#D4AF37] text-lg font-amiri">{totalAmount} {currency}</span>
+              </div>
+              
+              <button
+                onClick={() => setIsCheckoutOpen(true)}
+                className="w-full gold-btn font-bold py-3.5 rounded-xl text-sm tracking-wide shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>إتمام الطلب (التوصيل في تمنراست)</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+        </div>
       </div>
-    </div>
+
+      {/* نافذة نموذج إدخال البيانات المكتملة */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        cart={cart}
+        currency={currency}
+        onClearCart={onClearCart}
+      />
+    </>
   );
 }

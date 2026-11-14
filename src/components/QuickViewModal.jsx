@@ -1,61 +1,99 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X, Sparkles, ShoppingBag } from 'lucide-react';
-import { CURRENCIES } from '../data/products';
 
 export default function QuickViewModal({ product, currency, onClose, onAddToCart }) {
+  const [selectedSize, setSelectedSize] = useState('50 مل');
+
   if (!product) return null;
-  const { symbol, rate } = CURRENCIES[currency];
-  const priceFormatted = Math.round(product.price50 * rate);
+
+  const currentPrice = selectedSize === '50 مل' ? product.price50 : (product.price100 || product.price120 || product.price50 * 1.8);
+
+  const handleBuyNow = () => {
+    onAddToCart(product, selectedSize, currentPrice);
+    onClose(); // إغلاق نافذة التفاصيل وفتح نافذة إدخال المعلومات مباشرة
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
-      <div className="bg-[#1A1A1E] border luxury-border rounded-3xl w-full max-w-3xl overflow-hidden relative grid grid-cols-1 md:grid-cols-2 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+      <div className="bg-[#121214] border luxury-border w-full max-w-2xl rounded-3xl p-6 sm:p-8 relative shadow-2xl overflow-y-auto max-h-[95vh]">
         
+        {/* زر الإغلاق */}
         <button 
-          onClick={onClose} 
-          className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 p-2 rounded-full bg-[#121214]/90 text-[#F9F8F6] hover:text-[#D4AF37] border luxury-border cursor-pointer transition"
+          onClick={onClose}
+          className="absolute top-5 left-5 p-2 rounded-xl bg-[#1A1A1E] border luxury-border text-[#C5C5C0] hover:text-[#F9F8F6] cursor-pointer z-10"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="bg-[#121214] relative h-64 sm:h-80 md:h-full">
-          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          
+          {/* صورة المنتج */}
+          <div className="relative aspect-square rounded-2xl overflow-hidden border luxury-border bg-[#1A1A1E]">
+            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+            {product.badge && (
+              <span className="absolute top-3 right-3 bg-[#D4AF37] text-[#121214] text-[10px] font-bold px-3 py-1 rounded-full shadow-lg">
+                {product.badge}
+              </span>
+            )}
+          </div>
 
-        <div className="p-5 sm:p-8 flex flex-col justify-between space-y-5">
-          <div className="space-y-3 sm:space-y-4">
+          {/* تفاصيل الهرم العطري والقصة */}
+          <div className="space-y-4">
             <div>
-              <span className="text-[11px] sm:text-xs text-[#C5C5C0] tracking-widest uppercase">{product.subtitle}</span>
-              <h2 className="font-amiri text-2xl sm:text-3xl font-bold text-[#F9F8F6] mt-1">{product.name}</h2>
+              <span className="text-[10px] text-[#D4AF37] font-semibold tracking-wider uppercase block">{product.subtitle}</span>
+              <h3 className="font-amiri text-2xl font-bold text-[#F9F8F6]">{product.name}</h3>
+              <p className="text-xs text-[#C5C5C0] font-light mt-1 leading-relaxed">{product.story}</p>
             </div>
-            
-            <p className="text-xs sm:text-sm text-[#C5C5C0] leading-relaxed font-light">{product.description}</p>
 
             {/* الهرم العطري */}
-            <div className="bg-[#121214] border luxury-border p-3.5 sm:p-4 rounded-2xl space-y-1.5 text-xs">
-              <div className="flex items-center gap-2 text-[#D4AF37] font-semibold mb-1">
-                <Sparkles className="w-4 h-4" />
-                <span>الهرم العطري</span>
+            {product.notes && (
+              <div className="space-y-1.5 bg-[#1A1A1E]/50 border luxury-border p-3 rounded-xl text-xs">
+                <div className="flex items-center gap-1.5 text-[#D4AF37] font-bold pb-1 border-b border-stone-800">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>الهرم العطري والمكونات</span>
+                </div>
+                <p className="text-[#C5C5C0]"><strong className="text-[#F9F8F6]">القمة:</strong> {product.notes.top}</p>
+                <p className="text-[#C5C5C0]"><strong className="text-[#F9F8F6]">القلب:</strong> {product.notes.heart}</p>
+                <p className="text-[#C5C5C0]"><strong className="text-[#F9F8F6]">القاعدة:</strong> {product.notes.base}</p>
               </div>
-              <p className="text-[#F9F8F6]"><strong className="text-[#C5C5C0]">القمة:</strong> {product.notes.top}</p>
-              <p className="text-[#F9F8F6]"><strong className="text-[#C5C5C0]">القلب:</strong> {product.notes.heart}</p>
-              <p className="text-[#F9F8F6]"><strong className="text-[#C5C5C0]">القاعدة:</strong> {product.notes.base}</p>
-            </div>
-          </div>
+            )}
 
-          <div className="pt-4 border-t border-[#121214] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex items-center justify-between sm:block">
-              <span className="text-xs text-[#C5C5C0] block">السعر (50 مل)</span>
-              <span className="text-xl sm:text-2xl font-bold gold-gradient-text">{priceFormatted} {symbol}</span>
+            {/* اختيار الحجم */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-[#F9F8F6] block">اختر الحجم:</label>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setSelectedSize('50 مل')}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold border transition cursor-pointer ${
+                    selectedSize === '50 مل' ? 'gold-btn border-transparent' : 'bg-[#1A1A1E] border-stone-800 text-[#C5C5C0]'
+                  }`}
+                >
+                  50 مل ({product.price50} {currency})
+                </button>
+                {product.price100 && (
+                  <button
+                    onClick={() => setSelectedSize('100 مل')}
+                    className={`flex-1 py-2 rounded-xl text-xs font-bold border transition cursor-pointer ${
+                      selectedSize === '100 مل' ? 'gold-btn border-transparent' : 'bg-[#1A1A1E] border-stone-800 text-[#C5C5C0]'
+                    }`}
+                  >
+                    100 مل ({product.price100} {currency})
+                  </button>
+                )}
+              </div>
             </div>
-            <button 
-              onClick={() => { onAddToCart(product, '50ml', product.price50); onClose(); }} 
-              className="gold-btn font-bold px-6 py-3.5 rounded-2xl cursor-pointer flex items-center justify-center gap-2 text-sm shadow-lg"
+
+            {/* زر الشراء المباشر */}
+            <button
+              onClick={handleBuyNow}
+              className="w-full gold-btn font-bold py-3 rounded-xl text-xs tracking-wide shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-2"
             >
               <ShoppingBag className="w-4 h-4" />
-              أضف إلى حقيبتك
+              <span>اقتناء الآن - {currentPrice} {currency}</span>
             </button>
+
           </div>
+
         </div>
 
       </div>
